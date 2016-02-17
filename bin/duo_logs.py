@@ -82,6 +82,18 @@ class BaseLog(object):
         self.write_last_timestamp()
 
 
+    def write_events(self,path=None):
+        """
+        outputs to a log file under self.path / self.logname .log
+        """
+        if path == None:
+            path = self.path
+        file = '%s/%s.log'%(path,self.logname)
+        with open( file, 'a' ) as f:
+            for e in self.logs():
+                f.write(e + '\n')
+            
+
 class AdministratorLog(BaseLog):
     def __init__(self, admin_api, path):
         BaseLog.__init__(self, admin_api, path, "administrator")
@@ -232,13 +244,11 @@ def main():
 
     admin_api = admin_api_from_config(config_path)
 
-    # Use the directory of the config file to store the last event tstamps
-    path = os.path.dirname(config_path)
+    path = os.path.dirname(config_path) + '/../var/'
 
     for logclass in (AdministratorLog, AuthenticationLog, TelephonyLog):
         log = logclass(admin_api, path)
-        for e in log.logs():
-            print( e )
+        log.write_events( path=path + './logs/' )
 
 
 if __name__ == '__main__':
